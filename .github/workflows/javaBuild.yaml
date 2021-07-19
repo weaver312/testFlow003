@@ -1,0 +1,32 @@
+schema: tb
+pipeline:
+- name: Java集成
+  stages:
+  - driven: AUTO
+    jobs:
+    - displayName: Java镜像构建
+      task: execution-component-production@9
+      identifier: '10_1593497604296'
+      templateType: task
+      templateSign: ''
+      extraInfo: ''
+      params:
+        steps:
+        - {name: Java编译, stepType: java_build, stepIdentifier: '10_1593497604296__10_1593498341570',
+          version: jdk1.8, command: 'sh ${prepareShPath} ${appName} ${param} && mvn -B
+            clean package -Dmaven.test.skip=true -DapplicationName=${appName}', source: '',
+          isOpen: false}
+        - {name: 镜像构建并推送至镜像仓库, stepType: custom_docker_build, stepIdentifier: '10_1593497604296__10_1593745009051',
+          DOCKER_DESTINATION: '${dockerImage}', DOCKER_USER: '${userName}', DOCKER_PASSWORD: '${password}',
+          DOCKER_FILE_PATH: '${dockerFilePath}', CONTEXT_PATH: '', NO_CACHE: false,
+          ARGS: '{"APP_NAME":"${appName}","APP_NAME.type":"custom"}', JSONEncoding: true}
+        ENGINE_PIPELINE_NAME: ${INPUTS.ENGINE_PIPELINE_NAME}
+        ENGINE_PIPELINE_ID: ${INPUTS.ENGINE_PIPELINE_ID}
+        ENGINE_PIPELINE_INST_ID: ${INPUTS.ENGINE_PIPELINE_INST_ID}
+        ENGINE_PIPELINE_INST_NUMBER: ${INPUTS.ENGINE_PIPELINE_INST_NUMBER}
+        buildNodeGroup: K8S-4
+      plugins: []
+      output:
+      - {name: '10_1593497604296__10_1593745009051.dynamic_output.${dockerImage}',
+        displayName: '镜像仓库地址.${dockerImage}', type: artifact, identifier: 10_1593497604296__10_1593745009051__DOCKER_DESTINATION,
+        description: 自定义镜像仓库地址, export: true, ref: steps}
